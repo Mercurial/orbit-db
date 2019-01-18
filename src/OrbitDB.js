@@ -14,7 +14,8 @@ let AccessControllers = require('orbit-db-access-controllers')
 const OrbitDBAddress = require('./orbit-db-address')
 const createDBManifest = require('./db-manifest')
 const exchangeHeads = require('./exchange-heads')
-const isDefined = require('./utils/is-defined')
+const { isDefined, dagNode } = require('./utils')
+
 const Logger = require('logplease')
 const logger = Logger.create("orbit-db")
 Logger.setLogLevel('ERROR')
@@ -155,7 +156,7 @@ let databaseTypes = {
       accessController = await AccessControllers.resolve(this, options.accessControllerAddress, options.accessController)
     }
 
-    const cache = await this._loadCache(this.directory, address)
+    const cache = await this._loadCache(options.directory || this.directory, address)
 
     const opts = Object.assign({ replicate: true }, options, {
       accessController: accessController,
@@ -346,8 +347,8 @@ let databaseTypes = {
     logger.debug(`Loading Manifest for '${dbAddress}'`)
 
     // Get the database manifest from IPFS
-    const dag = await this._ipfs.object.get(dbAddress.root)
-    const manifest = JSON.parse(dag.toJSON().data)
+    const data = await dagNode.read(this._ipfs, dbAddress.root, ['next'])
+    const manifest = JSON.parse(data)
     logger.debug(`Manifest for '${dbAddress}':\n${JSON.stringify(manifest, null, 2)}`)
 
     // Make sure the type from the manifest matches the type that was given as an option

@@ -1,7 +1,9 @@
 'use strict'
-
 const path = require('path')
 const multihash = require('multihashes')
+const CID = require('cids')
+
+const notEmpty = e => e !== '' && e !== ' '
 
 class OrbitDBAddress {
   constructor (root, path) {
@@ -14,23 +16,28 @@ class OrbitDBAddress {
   }
 
   static isValid (address) {
-    const parts = address.toString()
-      .split('/')
-      .filter((e, i) => !((i === 0 || i === 1) && address.toString().indexOf('/orbit') === 0 && e === 'orbitdb'))
-      .filter(e => e !== '' && e !== ' ')
+    const containsProtocolPrefix = (e, i) => !((i === 0 || i === 1) && address.toString().indexOf('/orbit') === 0 && e === 'orbitdb')
 
-    const accessControllerHash = parts[0].indexOf('Qm') > -1 ? multihash.fromB58String(parts[0]) : null
-    try {
-      multihash.validate(accessControllerHash)
-    } catch (e) {
-      return false
-    }
+     const parts = address.toString()
+       .split('/')
+       .filter(containsProtocolPrefix)
+       .filter(notEmpty)
 
-    return accessControllerHash !== null
+     let accessControllerHash
+
+     try {
+       accessControllerHash = (parts[0].indexOf('zd') > -1 || parts[0].indexOf('Qm') > -1)
+         ? new CID(parts[0]).toBaseEncodedString()
+         : null
+     } catch (e) {
+       return false
+     }
+
+     return accessControllerHash !== null
   }
 
   static parse (address) {
-    if (!address) 
+    if (!address)
       throw new Error(`Not a valid OrbitDB address: ${address}`)
 
     if (!OrbitDBAddress.isValid(address))

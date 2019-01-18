@@ -8,21 +8,15 @@ const createDBManifest = async (ipfs, name, type, accessControllerAddress, onlyH
     type: type,
     accessController: path.join('/ipfs', accessControllerAddress),
   }
-  let dag
-  const manifestJSON = JSON.stringify(manifest)
-  if (onlyHash) {
-    dag = await new Promise(resolve => {
-      DAGNode.create(Buffer.from(manifestJSON), (err, n) => {
-        if (err) {
-          throw err
-        }
-        resolve(n)
-      })
-    })
-  } else {
-    dag = await ipfs.object.put(Buffer.from(manifestJSON))
-  }
-  return dag.toJSON().multihash.toString()
+
+  const data = Buffer.from(JSON.stringify(manifest))
+
+  const cid = await ipfs.dag.put(data, {
+    version: 1,
+    onlyHash: onlyHash || false
+  })
+
+  return cid.toBaseEncodedString()
 }
 
 module.exports = createDBManifest
