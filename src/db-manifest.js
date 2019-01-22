@@ -11,7 +11,7 @@ const createDBManifest = async (ipfs, name, type, accessControllerAddress, onlyH
 
   const data = Buffer.from(JSON.stringify(manifest))
 
-  const cid = await ipfs.dag.put(data, {
+  const cid = await ipfs.dag.put(manifest, {
     version: 1,
     onlyHash: onlyHash || false
   })

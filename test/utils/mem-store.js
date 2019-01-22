@@ -42,16 +42,16 @@ class MemStore {
   }
 
   async put (value) {
-    const data = Buffer.isBuffer(value) ? value : Buffer.from(JSON.stringify(value))
-    const multihash = await createMultihash(data, 'sha2-256')
+    const data = value
+    const multihash = await createMultihash(data, 'sha2-256', { onlyHash: true })
     const cid = new CID(1, 'dag-cbor', multihash)
     const hash = cid.toBaseEncodedString()
-    console.log("HASH", hash)
     // this._store.set(hash, data)
     if (!this._store) this._store = {}
     // console.log(this._store)
     // console.log(hash, data)
     this._store[hash] = data
+    console.log("DATA", data)
     // return hash
     return {
       toBaseEncodedString: () => hash
@@ -62,10 +62,10 @@ class MemStore {
     // const data = this._store.get(key)
     const data = this._store[key]
 
-    // if (data) {
-    //   const value = JSON.parse(data)
-    //   return value
-    // }
+    if (data) {
+      const value = JSON.parse(data)
+      return { value }
+    }
 
     // return data
     // return {
@@ -77,7 +77,7 @@ class MemStore {
     //   }
     // }
     return {
-      value: data
+      value: value
     }
   }
 }

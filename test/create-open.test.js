@@ -133,7 +133,7 @@ Object.keys(testAPIs).forEach(API => {
 
         it('saves database manifest file locally', async () => {
           const dag = await ipfs.dag.get(db.address.root)
-          const manifest = JSON.parse(dag.value)
+          const manifest = dag.value
           assert.notEqual(manifest, )
           assert.equal(manifest.name, 'second')
           assert.equal(manifest.type, 'feed')

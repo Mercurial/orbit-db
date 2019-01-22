@@ -167,7 +167,6 @@ let databaseTypes = {
 
     const store = new Store(this._ipfs, this.identity, address, opts)
     store.events.on('write', this._onWrite.bind(this))
-
     // ID of the store is the address as a string
     const addr = address.toString()
     this.stores[addr] = store
@@ -191,7 +190,7 @@ let databaseTypes = {
   async _onMessage (address, heads) {
     const store = this.stores[address]
     try {
-      logger.debug(`Received ${heads.length} heads for '${address}':\n`, JSON.stringify(heads.map(e => e.hash), null, 2))
+      logger.debug(`Received ${heads.length} heads for '${address}':\n`, JSON.stringify(heads.map(e => e.cid || e.hash), null, 2))
       if (store && heads && heads.length > 0) {
         await store.sync(heads)
       }
@@ -347,8 +346,7 @@ let databaseTypes = {
     logger.debug(`Loading Manifest for '${dbAddress}'`)
 
     // Get the database manifest from IPFS
-    const data = await dagNode.read(this._ipfs, dbAddress.root, ['next'])
-    const manifest = JSON.parse(data)
+    const manifest = await dagNode.read(this._ipfs, dbAddress.root, [])
     logger.debug(`Manifest for '${dbAddress}':\n${JSON.stringify(manifest, null, 2)}`)
 
     // Make sure the type from the manifest matches the type that was given as an option

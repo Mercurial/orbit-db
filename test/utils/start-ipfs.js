@@ -37,7 +37,7 @@ const startIpfs = (type, config = {}) => {
           }
 
           resolve(ipfsd)
-        }, 100)
+        }, 500)
       })
   })
 }
